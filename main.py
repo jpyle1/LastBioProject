@@ -1,5 +1,6 @@
 import optparse as optParse
 import random,math,array
+import matplotlib.pyplot as plt
 
 def main(jOne,jTwo,offset,rOne,rTwo):
 	"""
@@ -17,7 +18,16 @@ def main(jOne,jTwo,offset,rOne,rTwo):
 	avgMI = map(lambda x: sum(x)/4.0,zip(*map(lambda x: x['mI'],results)))
 	avgJE = map(lambda x: sum(x)/4.0,zip(*map(lambda x: x['jE'],results)))
 	avgCo = map(lambda x: sum(x)/4.0,zip(*map(lambda x: x['cor'],results)))	
-	
+	fig1 = plt.figure(1)
+	plt.subplot(211)
+	plt.imshow(results[0]['disp'])
+	plt.subplot(212)
+	plt.ylim(0,2)
+	plt.plot(xrange(14),avgMI)
+	plt.plot(xrange(14),avgJE)
+	plt.plot(xrange(14),avgCo)
+	plt.figtext(0,0,"CorrWaveLength="+str(avgWl)+","+"En="+str(avgEn))
+	plt.show()
 
 def getRadius(index,rOne,rTwo):
 	"""
@@ -164,19 +174,9 @@ def computeSteps(jOne,jTwo,offset,rOne,rTwo,radCache,distRadCache,runNumber):
 		pPlusMinus[radiusLength]*math.log(pPlusMinus[radiusLength],2)) for radiusLength in xrange(0,14)]
 	mutualInformation = [2*entropy-jointEntropy[radiusLength] for radiusLength in xrange(0,14)]
 	spatCorr.pop(0)
+	cells = [[ 1 if cells[i][j] == 1 else 0 for j in xrange(30)] for i in xrange(30)]
 	return {'mI': mutualInformation, 'jE': jointEntropy, 'en': entropy, 'wL': charWaveLength,
-		'cor': spatCorr}
-		 
-	"""		
-	printStr = ""
-	for i in xrange(30):
-		for j in xrange(30):
-			val = "*" if cells[i][j] == 1 else " "
-			printStr+=val
-		printStr+="\n"
-	print printStr		
- 	"""
-
+		'cor': spatCorr, 'disp': cells} 
 
 if __name__ == "__main__":
 	#Parse the Options from the user.
