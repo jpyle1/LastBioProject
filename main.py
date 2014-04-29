@@ -158,17 +158,22 @@ def computeSteps(jOne,jTwo,offset,rOne,rTwo,radCache,distRadCache,runNumber):
 	convertedNeg = [[ (cells[i][j]-1)/2.0 for j in xrange(30)] for i in xrange(30)]
 	prPlusOne = 1/900.0*sum([sum(converted[i]) for i in xrange(30)])
 	prMinusOne = 1 - prPlusOne
+	val1 = prPlusOne*math.log(prPlusOne,2) if prPlusOne !=0 else 0
+	val2 = prMinusOne*math.log(prMinusOne,2) if prMinusOne !=0 else 0
 	#Calc the entropy.
-	entropy = -1*(prPlusOne*math.log(prPlusOne,2)+prMinusOne*math.log(prMinusOne,2))
+	entropy = -1*(val1+val2)
 	#Calc the joint entropy.
 	posSums = [ sum(map(lambda x:converted[x[0][0]][x[0][1]]*converted[x[1][0]][x[1][1]], 
-		getItemFromDistRadCache(distRadCache,radiusLength) )) for radiusLength in xrange(15)] 
+		getItemFromDistRadCache(distRadCache,radiusLength) )) for radiusLength in xrange(0,15)]
+	posSums = [1 if posSums[radiusLength] == 0.0 else posSums[radiusLength] for radiusLength in
+		xrange(0,15)] 
 	negSums = [ sum(map(lambda x:convertedNeg[x[0][0]][x[0][1]]*convertedNeg[x[1][0]][x[1][1]],
-		getItemFromDistRadCache(distRadCache,radiusLength) )) for radiusLength in xrange(15)]
+		getItemFromDistRadCache(distRadCache,radiusLength) )) for radiusLength in xrange(0,15)]
+	negSums = [1 if negSums[rl] == 0.0 else negSums[rl] for rl in xrange(0,15)]
 	pPlusPlus = [ 1/(900.0*4*radiusLength)*posSums[radiusLength] for radiusLength in xrange(1,15)]
 	pMinusMinus = [1/(900.0*4*radiusLength)*negSums[radiusLength] for radiusLength in xrange(1,15)]
 	pPlusMinus = [1-pPlusPlus[rl]-pMinusMinus[rl] for rl in xrange(0,14)]
-	
+	pPlusMinus = [1 if pPlusMinus[rl] <= 0.0 else pPlusMinus[rl] for rl in xrange(0,14)]
 	jointEntropy = [-1*(pPlusPlus[radiusLength]*math.log(pPlusPlus[radiusLength],2)+
 		pMinusMinus[radiusLength]*math.log(pMinusMinus[radiusLength],2)+
 		pPlusMinus[radiusLength]*math.log(pPlusMinus[radiusLength],2)) for radiusLength in xrange(0,14)]
